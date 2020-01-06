@@ -38,6 +38,7 @@ var validator = {
 
   test_patternMismatch: function(ctl, data) {
     var self = this;
+
     test(function () {
       self.pre_check(ctl, "patternMismatch");
       self.iterate_over(ctl, data).forEach(function(val) {
@@ -52,6 +53,31 @@ var validator = {
               'The validity.patternMismatch should be false' + condStr);
       });
     }, data.name);
+
+    if (ctl.type === "email") {
+      var dataMultiple = {
+        ...data,
+        conditions: {
+          ...data.conditions,
+          multiple: true,
+          value: data.conditions.value ? [data.conditions.acceptableValue || data.conditions.value, data.conditions.value].join(',') : ""
+        }
+      };
+      test(function () {
+        self.pre_check(ctl, "patternMismatch");
+        self.iterate_over(ctl, dataMultiple).forEach(function(val) {
+          const {ctl, expected, condStr} = val;
+          if (expected)
+            assert_true(
+                ctl.validity.patternMismatch,
+                'The validity.patternMismatch should be true' + condStr);
+          else
+            assert_false(
+                ctl.validity.patternMismatch,
+                'The validity.patternMismatch should be false' + condStr);
+        });
+      }, data.name + ", when multiple attribute is present");
+    }
   },
 
   test_valueMissing: function(ctl, data) {
